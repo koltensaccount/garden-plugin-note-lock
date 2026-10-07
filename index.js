@@ -73,7 +73,11 @@ module.exports = {
     if (eleventyConfig.addTransform) eleventyConfig.addTransform("gp-note-lock-discovery", function (content, outputPath) {
       return filterDiscovery(content, outputPath || this.outputPath, protectedPaths, context.settings);
     });
-    eleventyConfig.on("eleventy.before", () => { resolve = createResolver(context.settings); });
+    eleventyConfig.on("eleventy.before", () => {
+      resolve = createResolver(context.settings);
+      protectedPaths.clear();
+      for (const key of overrides.keys()) protectedPaths.add(key);
+    });
     // The garden's slot renderer uses synchronous Nunjucks for-loops.
     eleventyConfig.addFilter("gpNoteLock", (path, locked) => {
       try { return resolve(path, locked); }

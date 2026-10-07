@@ -4,7 +4,7 @@ Validated on 2026-10-07, Node 22.23.3 and Microsoft Edge 153 (Playwright).
 
 ## Standalone
 
-`npm ci`, `npm run check`, `npm test`: 8 tests passed, none skipped. Tests include real Chromium interactions on focused fixtures, syntax/manifest checks and any existing Node unit coverage. Native printing is stubbed; no OS print dialog opens.
+`npm ci`, `npm run check`, `npm test`: 9 tests passed, none skipped. Tests include real Chromium interactions on focused fixtures, syntax/manifest checks and any existing Node unit coverage. Native printing is stubbed; no OS print dialog opens.
 
 ## Current upstream integration
 

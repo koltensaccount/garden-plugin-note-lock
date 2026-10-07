@@ -19,6 +19,21 @@ test('search and Atom exclude protected paths and retain unrelated entries; both
   assert.equal(filterDiscovery(feed,'dist/feed.xml',protectedPaths,{excludeLockedFromFeed:false}),feed);
 });
 
+test('watch rebuild clears removed per-note locks without losing configured overrides', () => {
+  let before, collect, transform;
+  require('../index.js').setupEleventy({
+    on(name, callback) { before=callback; },
+    addCollection(name, callback) { collect=callback; },
+    addTransform(name, callback) { transform=callback; },
+    addFilter() {}
+  }, {settings:{notePasswords:'{"/configured/":"fixture only"}'}});
+  before();collect({getAll:()=>[{url:'/marked/',data:{lock:true}}]});
+  const content=JSON.stringify([{url:'/marked/'},{url:'/configured/'}]);
+  assert.deepEqual(JSON.parse(transform(content,'dist/searchIndex.json')),[]);
+  before();collect({getAll:()=>[{url:'/marked/',data:{lock:false}}]});
+  assert.deepEqual(JSON.parse(transform(content,'dist/searchIndex.json')),[{url:'/marked/'}]);
+});
+
 test("lock bootstrap and critical sidebar hiding are emitted in the document head", () => {
   const manifest = require("../garden-plugin.json");
   assert.equal(manifest.slots["common.head"], "templates/lock.njk");
