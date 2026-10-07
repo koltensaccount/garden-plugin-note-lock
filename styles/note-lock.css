@@ -1,4 +1,5 @@
-html.dg-note-locked body main.content { visibility: hidden !important; }
+html.dg-note-locked body > :not(.dg-note-lock),
+html.dg-note-locked body > :not(.dg-note-lock) * { visibility: hidden !important; }
 .dg-note-lock {
   position: fixed;
   inset: 0;

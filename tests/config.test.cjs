@@ -1,7 +1,19 @@
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const crypto = require("node:crypto");
+const fs = require("node:fs");
+const path = require("node:path");
 const { createResolver } = require("../index.js");
+
+test("lock bootstrap and critical sidebar hiding are emitted in the document head", () => {
+  const manifest = require("../garden-plugin.json");
+  assert.equal(manifest.slots["common.head"], "templates/lock.njk");
+  assert.equal(manifest.slots["common.header"], undefined);
+  const template = fs.readFileSync(path.join(__dirname, "../templates/lock.njk"), "utf8");
+  assert(template.includes("<style>"));
+  assert(template.includes("body > :not(.dg-note-lock) *"));
+  assert(template.includes("visibility: hidden !important"));
+});
 
 test("ordinary notes have no lock and text flags do not accidentally mark notes", async () => {
   const resolve = createResolver({ defaultPassword: "example only", notePasswords: "{}" });

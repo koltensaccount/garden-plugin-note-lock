@@ -1,6 +1,6 @@
 {
   "name": "garden-plugin-note-lock",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": true,
   "scripts": {
     "check": "node --check index.js && node --check assets/note-lock.js",

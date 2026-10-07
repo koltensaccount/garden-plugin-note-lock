@@ -1,11 +1,11 @@
 {
   "id": "note-lock",
   "name": "Note Lock (Casual Privacy)",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A theme-matched client-side password screen for casual privacy ONLY. Not encryption or secure access control: note content may remain readable in page source, search, feeds and embeds. Passwords are stored in your garden configuration; never use a sensitive or reused password.",
   "author": "Kolten Bendickson",
   "hooks": "index.js",
-  "slots": { "common.header": "templates/lock.njk" },
+  "slots": { "common.head": "templates/lock.njk" },
   "styles": ["styles/note-lock.css"],
   "scripts": ["assets/note-lock.js"],
   "settings": [
