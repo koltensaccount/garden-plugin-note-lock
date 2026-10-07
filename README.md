@@ -10,15 +10,31 @@ In Obsidian: Settings > Digital Garden > Plugins > Manage plugins > Browse & ins
 
 ## Usage
 
-Configure a shared password in the manager and set lock: true on notes, or configure URL-to-password JSON overrides. Keep the garden source private: configured passwords are stored there. The client receives salted PBKDF2 verifiers, but content is still present in HTML, embeds, attachments and older caches. Optional search/feed filtering removes known locked entries, not every possible disclosure. Do not use sensitive/reused passwords. Misconfiguration shows an owner-facing configuration lock instead of breaking the build. Show file browser while locked is off by default.
+The simplest workflow needs no paths or JSON:
+
+1. Set **Shared password for selected notes** in the Digital Garden plugin manager. Leave the advanced URL setting as `{}`.
+2. In each Obsidian note you want to lock, add a property named `lock`, change its type to **Checkbox**, and check it.
+3. Publish the note and let the site rebuild. Uncheck `lock` and republish to remove the lock.
+
+Equivalent note frontmatter:
+
+```yaml
+lock: true
+```
+
+The checkbox is read from Digital Garden's exported `dg-note-properties` metadata as well as legacy top-level frontmatter. It must be a real boolean, not the text "true". Configuring the shared password alone does not lock any notes, including the homepage.
+
+For different passwords, the advanced JSON setting accepts exact published paths, not vault filenames. Copy the browser URL's path after opening the published note. Example: `{"/private-note/":"different passphrase"}`. A valid but wrong path does not lock a different note. Invalid JSON/entries are ignored with build warnings, rather than locking every page. Dot segments and encoded path separators are rejected; only an exact `/` intentionally selects the homepage. Because invalid overrides are ignored, use the checkbox workflow when you want a note to remain visibly locked even if settings are incomplete.
+
+Keep the garden source private: configured passwords are stored there. The client receives salted PBKDF2 verifiers, but content is still present in HTML, embeds, attachments and older caches. Optional search/feed filtering removes known locked entries, not every possible disclosure. Do not use sensitive/reused passwords. A selected note without a usable shared password shows **Lock needs setup**, not an unusable password field. Show file browser while locked is off by default. Head-time CSS hides note content and the TOC until successful unlock, including when runtime assets are delayed or JavaScript is disabled; JavaScript is required to enter a password.
 
 ## Settings
 
 | Key | Setting | Default |
 | --- | --- | --- |
 | `showFileBrowser` | Show file browser while locked | false |
-| `defaultPassword` | Password for locked notes | "" |
-| `notePasswords` | Per-note passwords (JSON) | "{}" |
+| `defaultPassword` | Shared password for selected notes | "" |
+| `notePasswords` | Different passwords by URL (advanced, optional) | "{}" |
 | `excludeLockedFromSearch` | Exclude locked notes from search | true |
 | `excludeLockedFromFeed` | Exclude locked notes from RSS | true |
 

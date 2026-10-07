@@ -1,7 +1,7 @@
 {
   "id": "note-lock",
   "name": "Note Lock (Casual Privacy)",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "A client-side password screen for casual privacy with optional navigation and search/feed filtering; not encryption or secure access control.",
   "author": "Kolten Bendickson",
   "hooks": "index.js",
@@ -24,15 +24,15 @@
     },
     {
       "key": "defaultPassword",
-      "name": "Password for locked notes",
-      "description": "Used by notes with lock: true. Visible in this settings field and to anyone with access to the garden source repository. Use a unique passphrase.",
+      "name": "Shared password for selected notes",
+      "description": "Set this once, then add a checkbox property named lock to each note you want to protect and check it. No URL mapping is needed. Passwords are visible in the garden source; use a unique passphrase.",
       "type": "text",
       "default": ""
     },
     {
       "key": "notePasswords",
-      "name": "Per-note passwords (JSON)",
-      "description": "Optional overrides using published note URLs: {\"/private-note/\":\"different passphrase\"}. These notes are locked automatically. Keep the garden source repository private.",
+      "name": "Different passwords by URL (advanced, optional)",
+      "description": "Leave {} for the checkbox workflow. For different passwords, copy the exact published path: {\"/private-note/\":\"different passphrase\"}. Invalid entries are ignored with build warnings; paths are never guessed. Only an exact / targets the homepage. Keep the source repository private.",
       "type": "text",
       "default": "{}"
     },

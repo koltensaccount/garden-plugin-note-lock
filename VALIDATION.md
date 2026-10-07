@@ -1,12 +1,18 @@
 # Validation
 
-Validated on 2026-10-07, Node 22.23.3 and Microsoft Edge 153 (Playwright).
+Version 1.1.1 validated on 2026-10-07, Node 22.23.3 and Google Chrome 154 (Playwright).
 
 ## Standalone
 
-`npm ci`, `npm run check`, `npm test`: 9 tests passed, none skipped. Tests include real Chromium interactions on focused fixtures, syntax/manifest checks and any existing Node unit coverage. Native printing is stubbed; no OS print dialog opens.
+`npm ci`, `npm run check`, `npm test`: 12 tests passed, none skipped. New regressions use the actual Nunjucks head template, exported Obsidian checkbox metadata, malformed JSON/invalid paths, exact homepage selection, and keyboard typing/reveal/wrong-password recovery at desktop/mobile sizes. Ten delayed streaming-load cycles sample pre-bootstrap animation frames and assert no note-body or TOC visibility, even with theme visibility overrides. No-JavaScript pages also keep protected content hidden. Incomplete password setup shows an explicit setup message rather than a disabled entry field. Existing search/feed filtering and watch-rebuild tests remain passing.
 
-## Current upstream integration
+## Version 1.1.1 integration
+
+Five isolated real-garden builds/checks passed on upstream commit `80a33ffa6cb198ecf733e5944b4a60510970e3b0`: Note Lock alone with navigation off/on, all seven with navigation off/on, and all seven with malformed overrides. Core file browser and TOC were enabled explicitly. Each scenario exercises six page-load/unlock cycles across 1600 px and 390 px, keyboard entry, hidden note/TOC before unlock, public homepage access, exact URL overrides and mobile overflow. All-seven checks also exercise folding after unlock, print-dialog access after unlock, and blocked Ctrl+P before unlock. No browser page errors occurred. Desktop/mobile lock screenshots were visually inspected.
+
+Other plugin versions: Resizable Panes 1.1.1, TOC Settings 1.1.0, Reading Progress 1.0.1, Appearance & Reading 1.2.0, Clean Print 1.0.1, Heading Folding 1.0.0. No Digital Garden core source edits or installed-vault plugin changes were made. The broader historical matrix below was not rerun for this patch.
+
+## Previous upstream integration
 
 Upstream Digital Garden commit `80a33ffa6cb198ecf733e5944b4a60510970e3b0`, registry commit `ed1b497a4cd584721edf51e7c1a3ef9481229818`. Each of seven plugins was installed and built individually, then all seven built together: eight successful `npm run build` executions on Node 22. No core source modifications were required.
 

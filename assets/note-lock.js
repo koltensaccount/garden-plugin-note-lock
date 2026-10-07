@@ -66,8 +66,10 @@
     var status = dialog.querySelector('[role="status"]');
     var reveal = dialog.querySelector(".dg-note-lock-reveal");
     if (payload.configurationError) {
-      input.disabled = true;
-      submit.disabled = true;
+      dialog.querySelector("h1").textContent = "Lock needs setup";
+      dialog.querySelector(".dg-note-lock-caption").textContent = "No usable password is configured for this note.";
+      dialog.querySelector(".dg-note-lock-entry").remove();
+      dialog.querySelector("label").remove();
       status.textContent = "The garden owner needs to correct this note's lock settings.";
       return;
     }
@@ -118,6 +120,7 @@
           return;
         }
         input.value = "";
+        document.documentElement.classList.add("dg-note-unlocked");
         document.documentElement.classList.remove("dg-note-locked");
         document.documentElement.classList.remove("dg-note-lock-navigation");
         if (navigationObserver) navigationObserver.disconnect();

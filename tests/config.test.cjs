@@ -63,11 +63,35 @@ test("note rules and checkbox flag produce verifiers without plaintext passwords
   }
 });
 
-test("invalid settings and missing passwords fail visibly", () => {
-  assert.throws(() => createResolver({ notePasswords: "not json" })("/note/", false), /valid JSON/);
-  assert.throws(() => createResolver({ notePasswords: "[]" })("/note/", false), /JSON object/);
+test("invalid overrides never lock unrelated notes or the homepage; explicit locks still work", () => {
+  const badPaths = ['/private/../', '/%2e%2e/', '/.\t/', '/?', '/#', '/%2f/', '/back\\slash/'];
+  for (const raw of ['not json', '[]', '{"https://example.com/":"example"}', ...badPaths.map(key=>JSON.stringify({[key]:'example'}))]) {
+    const resolve = createResolver({ notePasswords: raw, defaultPassword: 'fixture only' });
+    assert.equal(resolve('/', false), null);
+    assert.equal(resolve('/public/', false), null);
+    assert.equal(JSON.parse(resolve('/marked/', true)).iterations, 600000);
+  }
   assert.throws(() => createResolver({ notePasswords: '{}', defaultPassword: "" })("/note/", true), /no password/);
-  assert.throws(() => createResolver({ notePasswords: '{"https://example.com/":"example"}' })("/note/", false), /published paths/);
+});
+
+test('valid overrides survive invalid entries and wrong valid paths cannot match the homepage', () => {
+  const resolve = createResolver({ notePasswords: JSON.stringify({'/missing-note/':'test', '/specific/':'test', '/x/../':'bad', '/':'intentional home'}) });
+  assert.equal(resolve('/other/', false), null);
+  assert.equal(JSON.parse(resolve('/specific/', false)).iterations, 600000);
+  assert.equal(JSON.parse(resolve('/', false)).iterations, 600000, 'Only exact / opts into a homepage lock');
+  assert.equal(createResolver({notePasswords:'{"/missing-note/":"test"}'})('/', false), null);
+});
+
+test('actual Nunjucks template reads exported Obsidian checkbox properties, not truthy strings', () => {
+  const nunjucks = require('nunjucks');
+  const env = new nunjucks.Environment(new nunjucks.FileSystemLoader(path.join(__dirname, '../templates')), {autoescape:true});
+  require('../index.js').setupEleventy({on(){},addFilter(name, callback){env.addFilter(name, callback);}}, {settings:{notePasswords:'{}',defaultPassword:'fixture only'}});
+  for (const flag of [true, false, 'true', 'false', undefined]) {
+    const html = env.render('lock.njk', {page:{url:'/specific/'},'dg-note-properties':{lock:flag},pluginSettings:{}});
+    assert.equal(html.includes('id="dg-note-lock-config"'), flag === true);
+  }
+  assert(!env.render('lock.njk',{page:{url:'/'},pluginSettings:{}}).includes('dg-note-lock-config'));
+  assert(!env.render('lock.njk',{page:{url:'/'},lock:true,'dg-note-properties':{lock:false},pluginSettings:{}}).includes('dg-note-lock-config'));
 });
 
 test("file-browser access is opt-in and is carried in the page configuration", () => {

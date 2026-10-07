@@ -1,3 +1,5 @@
+html.dg-note-locked:not(.dg-note-lock-navigation) body > :not(.dg-note-lock),
+html.dg-note-locked body :is(main.content, #page-panel, .sidebar, .toc-container, .page-panel-backdrop, .dg-reading-meta, .dg-reading-progress) { display: none !important; }
 html.dg-note-locked body > :not(.dg-note-lock),
 html.dg-note-locked body > :not(.dg-note-lock) * { visibility: hidden !important; }
 html.dg-note-locked.dg-note-lock-navigation body:not(.dg-rp-left-closed) .filetree-wrapper,
