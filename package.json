@@ -1,0 +1,11 @@
+{
+  "name": "garden-plugin-note-lock",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "check": "node --check index.js && node --check assets/note-lock.js",
+    "test": "node --test tests/*.test.cjs",
+    "install:garden": "node scripts/install.cjs"
+  },
+  "engines": { "node": ">=22" }
+}
