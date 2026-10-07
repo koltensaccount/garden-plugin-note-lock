@@ -1,6 +1,4 @@
 const crypto = require("node:crypto");
-const { promisify } = require("node:util");
-const derive = promisify(crypto.pbkdf2);
 const ITERATIONS = 600000;
 
 function normalizePath(value) {
@@ -37,7 +35,9 @@ function safeJson(value) {
 
 function createResolver(settings) {
   const cache = new Map();
-  return async function resolve(path, locked) {
+  return function resolve(path, locked) {
+    // Eleventy also renders the unused landing template with permalink: false.
+    if (path === false || path === undefined || path === null) return null;
     // Validate during rendering so invalid settings fail the build visibly.
     const overrides = readOverrides(settings.notePasswords);
     const key = normalizePath(path);
@@ -47,9 +47,9 @@ function createResolver(settings) {
     if (typeof password !== "string" || !password.length) {
       throw new Error("Note Lock: a note has lock: true but no password is configured in the plugin settings.");
     }
-    if (!cache.has(key)) cache.set(key, (async () => {
+    if (!cache.has(key)) cache.set(key, (() => {
       const salt = crypto.randomBytes(16);
-      const verifier = await derive(password, salt, ITERATIONS, 32, "sha256");
+      const verifier = crypto.pbkdf2Sync(password, salt, ITERATIONS, 32, "sha256");
       return safeJson({ version: 1, salt: salt.toString("base64"), verifier: verifier.toString("base64"), iterations: ITERATIONS });
     })());
     return cache.get(key);
@@ -60,9 +60,8 @@ module.exports = {
   setupEleventy(eleventyConfig, context) {
     let resolve = createResolver(context.settings);
     eleventyConfig.on("eleventy.before", () => { resolve = createResolver(context.settings); });
-    eleventyConfig.addNunjucksAsyncFilter("gpNoteLock", (path, locked, callback) => {
-      resolve(path, locked).then(value => callback(null, value), error => callback(error));
-    });
+    // The garden's slot renderer uses synchronous Nunjucks for-loops.
+    eleventyConfig.addFilter("gpNoteLock", (path, locked) => resolve(path, locked));
   },
   createResolver
 };

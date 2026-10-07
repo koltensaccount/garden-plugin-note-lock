@@ -7,6 +7,7 @@ test("ordinary notes have no lock and text flags do not accidentally mark notes"
   const resolve = createResolver({ defaultPassword: "example only", notePasswords: "{}" });
   assert.equal(await resolve("/public/", false), null);
   assert.equal(await resolve("/public/", "false"), null);
+  assert.equal(await resolve(false, false), null);
 });
 
 test("note rules and checkbox flag produce verifiers without plaintext passwords", async () => {
@@ -21,9 +22,21 @@ test("note rules and checkbox flag produce verifiers without plaintext passwords
   }
 });
 
-test("invalid settings and missing passwords fail visibly", async () => {
-  await assert.rejects(createResolver({ notePasswords: "not json" })("/note/", false), /valid JSON/);
-  await assert.rejects(createResolver({ notePasswords: "[]" })("/note/", false), /JSON object/);
-  await assert.rejects(createResolver({ notePasswords: '{}', defaultPassword: "" })("/note/", true), /no password/);
-  await assert.rejects(createResolver({ notePasswords: '{"https://example.com/":"example"}' })("/note/", false), /published paths/);
+test("invalid settings and missing passwords fail visibly", () => {
+  assert.throws(() => createResolver({ notePasswords: "not json" })("/note/", false), /valid JSON/);
+  assert.throws(() => createResolver({ notePasswords: "[]" })("/note/", false), /JSON object/);
+  assert.throws(() => createResolver({ notePasswords: '{}', defaultPassword: "" })("/note/", true), /no password/);
+  assert.throws(() => createResolver({ notePasswords: '{"https://example.com/":"example"}' })("/note/", false), /published paths/);
+});
+
+test("hook registers a synchronous filter that emits the lock payload", () => {
+  let filter;
+  require("../index.js").setupEleventy({
+    on() {},
+    addFilter(name, callback) { assert.equal(name, "gpNoteLock"); filter = callback; }
+  }, { settings: { defaultPassword: "", notePasswords: '{"/":"integration example"}' } });
+  const value = filter("/", undefined);
+  assert.equal(typeof value, "string");
+  assert.equal(JSON.parse(value).iterations, 600000);
+  assert(!value.includes("integration example"));
 });
