@@ -60,3 +60,4 @@ html.dg-note-locked.dg-note-lock-navigation body .fullpage-overlay { z-index: 10
 #dg-note-lock-status { min-height: 40px; margin: 10px 0 16px; font-size: 13px; color: var(--text-muted); overflow-wrap: anywhere; }
 .dg-note-lock-home { font-size: 13px; color: var(--text-muted); }
 @media print { .dg-note-lock { display: none !important; } }
+.dg-note-lock span[aria-hidden="true"] { font-family: system-ui, sans-serif; }

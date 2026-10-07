@@ -1,82 +1,35 @@
-# Note Lock (Casual Privacy) for Digital Garden
+# Note Lock (Casual Privacy)
 
-**This is not encryption or secure access control.** It adds a theme-matched
-password screen to discourage casual reading. Content remains in the downloaded
-HTML and may also appear in search, RSS, embeds, attachments, caches and earlier
-deployments. A visitor can bypass the screen with developer tools. Do not use
-this for confidential notes.
+A client-side password screen for casual privacy with optional navigation and search/feed filtering; not encryption or secure access control.
 
-Install this repository URL using Digital Garden's **Install from GitHub** menu.
-No modifications to Digital Garden's Obsidian plugin are needed. No build step
-or dependency installation is required for this plugin's source files.
+![Note Lock (Casual Privacy) in a Digital Garden](screenshot.png)
 
-## Configure
+## Installation
 
-In the garden plugin menu, open **Note Lock (Casual Privacy)** and set
-**Password for locked notes** to a unique passphrase. In Obsidian, mark a note:
+In Obsidian: Settings > Digital Garden > Plugins > Manage plugins > Browse & install. Until listed in the community gallery, use Install from GitHub with `koltensaccount/garden-plugin-note-lock`. A garden with current plugin support is required. Installation is file copying only; no setup scripts or dependencies need to run on the garden. Save settings and let the site rebuild.
 
-```yaml
-lock: true
-```
+## Usage
 
-Keep `dg-publish: true` when publishing. Use `lock` as a checkbox property,
-not text. Do **not** put a real password in a note's `password` property.
-Digital Garden publishes custom note properties.
+Configure a shared password in the manager and set lock: true on notes, or configure URL-to-password JSON overrides. Keep the garden source private: configured passwords are stored there. The client receives salted PBKDF2 verifiers, but content is still present in HTML, embeds, attachments and older caches. Optional search/feed filtering removes known locked entries, not every possible disclosure. Do not use sensitive/reused passwords. Misconfiguration shows an owner-facing configuration lock instead of breaking the build. Show file browser while locked is off by default.
 
-For individual passwords, set **Per-note passwords (JSON)** in the plugin menu:
+## Settings
 
-```json
-{"/private-note/":"a unique passphrase", "/another-note/":"a different passphrase"}
-```
+| Key | Setting | Default |
+| --- | --- | --- |
+| `showFileBrowser` | Show file browser while locked | false |
+| `defaultPassword` | Password for locked notes | "" |
+| `notePasswords` | Per-note passwords (JSON) | "{}" |
+| `excludeLockedFromSearch` | Exclude locked notes from search | true |
+| `excludeLockedFromFeed` | Exclude locked notes from RSS | true |
 
-Use the published URL path, including any folder names. These rules automatically
-lock the matching pages without needing a `lock` property. Use `/` for the home
-page if it is a garden entry. Trailing slashes are optional. Passwords are exact
-and case-sensitive; surrounding spaces are part of the password.
+## Compatibility and Accessibility
 
-Save settings and publish/redeploy the garden. Reopening a page requires its
-password again; entered passwords are not stored in browser storage. Disabling
-or uninstalling this plugin removes the lock on the next deployment.
-
-**Show file browser while locked** is off by default. Enable it to keep the
-garden's existing file/tag browser and mobile navigation available alongside
-the lock. Useful when the locked note is the homepage. The note and right TOC
-remain hidden. File-browser resizing, collapse/reopen and theme switching keep
-working. Search, TOC and print buttons are hidden while locked and return after
-unlocking. This honors Digital Garden's existing file-browser setting and does
-not create a second browser or modify core files or other plugins.
-
-Off keeps the full-page screen with navigation hidden. This does not prevent
-direct visits to other URLs; mark other notes as locked too if you want the
-same casual-privacy screen on them.
-
-## Limitations
-
-Passwords are stored as plaintext in the garden plugin configuration in your
-source repository. The standard plugin manager's text inputs are not masked.
-Keep the repository private; anyone with repository or build-system access can
-read the configured passwords. Public plugin source contains no passwords.
-
-At build time, random per-page salts and PBKDF2-SHA256 (600,000 iterations)
-produce verifiers; this plugin emits only verifiers, not the configured plaintext
-passwords, to site pages. Verifiers can still be attacked offline by guessing.
-Strong, unique passphrases help but do not protect the already-readable content.
-Other plugins can expose their own copies of settings or content; this plugin
-does not audit them. HTTPS and Web Crypto support are required for password entry.
-
-A marked note without a configured password or malformed JSON stops rendering
-with a configuration error. As with any garden plugin, disabling the plugin or
-failure to load its hook removes its protection. This is a convenience screen,
-not a security boundary.
+Works alone and with the other reading plugins. Shared footer controls use the neutral `dg-nav-tools` convention, with a floating fallback when navigation is absent. Each plugin ships the helper it needs; none imports another plugin. Current Digital Garden uses full-document navigation. Initialization is idempotent. Native controls, accessible labels, focus outlines and appropriate ARIA states are retained. Print styles remain separate from screen preferences. Browser storage failures fall back safely.
 
 ## Development
 
-```sh
-npm run check
-npm test
-npm run install:garden -- /path/to/my-digital-garden
-```
+Node 22+; `npm ci`, `npm run check`, `npm test`. Tests use Node's test runner and Playwright's driver with an installed Chrome/Edge browser (`CHROME_PATH` overrides discovery). CI uses Ubuntu's Chrome. Browser tests never invoke an OS print dialog. The plugin files are ready to copy directly into `src/plugins/note-lock/` in a current test garden. Real upstream integration and combination checks are reported in `VALIDATION.md`.
 
-Update both version fields for releases. Digital Garden installs the latest
-GitHub release when present, otherwise the default branch. Do not commit real
-passwords or fixtures with private content to this plugin repository.
+## License
+
+MIT, copyright 2026 Kolten Bendickson.

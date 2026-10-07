@@ -38,7 +38,7 @@ function createResolver(settings) {
   return function resolve(path, locked) {
     // Eleventy also renders the unused landing template with permalink: false.
     if (path === false || path === undefined || path === null) return null;
-    // Validate during rendering so invalid settings fail the build visibly.
+    // Validate during rendering; the template filter catches errors and locks visibly.
     const overrides = readOverrides(settings.notePasswords);
     const key = normalizePath(path);
     const explicit = overrides.has(key);
@@ -59,9 +59,54 @@ function createResolver(settings) {
 module.exports = {
   setupEleventy(eleventyConfig, context) {
     let resolve = createResolver(context.settings);
+    const protectedPaths = new Set();
+    let overrides;
+    try { overrides = readOverrides(context.settings.notePasswords); } catch (_) { overrides = new Map(); }
+    for (const key of overrides.keys()) protectedPaths.add(key);
+    if (eleventyConfig.addCollection) eleventyConfig.addCollection("gpNoteLockPaths", api => {
+      for (const item of api.getAll()) {
+        const props = item.data && item.data["dg-note-properties"];
+        if (item.url && (props && props.lock === true || item.data && item.data.lock === true)) protectedPaths.add(normalizePath(item.url));
+      }
+      return [];
+    });
+    if (eleventyConfig.addTransform) eleventyConfig.addTransform("gp-note-lock-discovery", function (content, outputPath) {
+      return filterDiscovery(content, outputPath || this.outputPath, protectedPaths, context.settings);
+    });
     eleventyConfig.on("eleventy.before", () => { resolve = createResolver(context.settings); });
     // The garden's slot renderer uses synchronous Nunjucks for-loops.
-    eleventyConfig.addFilter("gpNoteLock", (path, locked) => resolve(path, locked));
+    eleventyConfig.addFilter("gpNoteLock", (path, locked) => {
+      try { return resolve(path, locked); }
+      catch (_) {
+        console.warn("[note-lock] Check the password configuration; affected pages show a configuration lock.");
+        return safeJson({ version: 1, configurationError: true, showFileBrowser: false });
+      }
+    });
   },
-  createResolver
+  createResolver,
+  filterDiscovery
 };
+
+function filterDiscovery(content, outputPath, protectedPaths, settings) {
+  const target = String(outputPath || "").replace(/\\/g, "/");
+  const locked = url => {
+    try { return protectedPaths.has(normalizePath(new URL(url, "https://garden.invalid").pathname)); }
+    catch (_) { return false; }
+  };
+  if (target.endsWith("/searchIndex.json") && settings.excludeLockedFromSearch !== false) {
+    const entries = JSON.parse(content);
+    if (Array.isArray(entries)) return JSON.stringify(entries.filter(entry => !locked(entry.url)));
+  }
+  if (target.endsWith("/feed.xml") && settings.excludeLockedFromFeed !== false && content.trim()) {
+    // node-html-parser is shipped by the current garden; keep Atom links self-closing.
+    const { parse } = require("node-html-parser");
+    const root = parse(content, { lowerCaseTagName: false, comment: true, voidTag: { tags: ["link"], closingSlash: true } });
+    root.querySelectorAll("entry").forEach(entry => {
+      const link = entry.querySelector("link");
+      const id = entry.querySelector("id");
+      if (locked(link && link.getAttribute("href") || id && id.textContent)) entry.remove();
+    });
+    return root.toString();
+  }
+  return content;
+}

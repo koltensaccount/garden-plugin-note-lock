@@ -4,6 +4,20 @@ const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
 const { createResolver } = require("../index.js");
+const { filterDiscovery } = require("../index.js");
+
+test('search and Atom exclude protected paths and retain unrelated entries; both options can be disabled', () => {
+  const protectedPaths = new Set(['/locked-demonstration']);
+  const search = JSON.stringify([{url:'/public/'},{url:'/locked-demonstration/',content:'private fixture'}]);
+  assert.deepEqual(JSON.parse(filterDiscovery(search,'dist/searchIndex.json',protectedPaths,{})),[{url:'/public/'}]);
+  assert.equal(filterDiscovery(search,'dist/searchIndex.json',protectedPaths,{excludeLockedFromSearch:false}),search);
+  const feed = '<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom"><title>Garden</title><entry><title>Public</title><link href="https://example.com/public/"/><id>https://example.com/public/</id><content type="html">&lt;p&gt;Public&lt;/p&gt;</content></entry><entry><title>Private</title><link href="https://example.com/locked-demonstration/"/><id>https://example.com/locked-demonstration/</id></entry></feed>';
+  const result = filterDiscovery(feed,'dist/feed.xml',protectedPaths,{});
+  assert(!result.includes('<title>Private</title>'));
+  assert(result.includes('<title>Public</title>'));
+  assert(result.includes('&lt;p&gt;Public&lt;/p&gt;'));
+  assert.equal(filterDiscovery(feed,'dist/feed.xml',protectedPaths,{excludeLockedFromFeed:false}),feed);
+});
 
 test("lock bootstrap and critical sidebar hiding are emitted in the document head", () => {
   const manifest = require("../garden-plugin.json");

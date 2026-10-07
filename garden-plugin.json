@@ -2,15 +2,51 @@
   "id": "note-lock",
   "name": "Note Lock (Casual Privacy)",
   "version": "1.1.0",
-  "description": "A theme-matched client-side password screen for casual privacy ONLY. Not encryption or secure access control: note content may remain readable in page source, search, feeds and embeds. Passwords are stored in your garden configuration; never use a sensitive or reused password.",
+  "description": "A client-side password screen for casual privacy with optional navigation and search/feed filtering; not encryption or secure access control.",
   "author": "Kolten Bendickson",
   "hooks": "index.js",
-  "slots": { "common.head": "templates/lock.njk" },
-  "styles": ["styles/note-lock.css"],
-  "scripts": ["assets/note-lock.js"],
+  "slots": {
+    "common.head": "templates/lock.njk"
+  },
+  "styles": [
+    "styles/note-lock.css"
+  ],
+  "scripts": [
+    "assets/note-lock.js"
+  ],
   "settings": [
-    { "key": "showFileBrowser", "name": "Show file browser while locked", "description": "Keep existing navigation usable so visitors can leave a locked homepage. Off keeps the full-page lock. Honors Digital Garden's file-browser setting; it does not protect other notes.", "type": "boolean", "default": false },
-    { "key": "defaultPassword", "name": "Password for locked notes", "description": "Used by notes with lock: true. Visible in this settings field and to anyone with access to the garden source repository. Use a unique passphrase.", "type": "text", "default": "" },
-    { "key": "notePasswords", "name": "Per-note passwords (JSON)", "description": "Optional overrides using published note URLs: {\"/private-note/\":\"different passphrase\"}. These notes are locked automatically. Keep the garden source repository private.", "type": "text", "default": "{}" }
+    {
+      "key": "showFileBrowser",
+      "name": "Show file browser while locked",
+      "description": "Keep existing navigation usable so visitors can leave a locked homepage. Off keeps the full-page lock. Honors Digital Garden's file-browser setting; it does not protect other notes.",
+      "type": "boolean",
+      "default": false
+    },
+    {
+      "key": "defaultPassword",
+      "name": "Password for locked notes",
+      "description": "Used by notes with lock: true. Visible in this settings field and to anyone with access to the garden source repository. Use a unique passphrase.",
+      "type": "text",
+      "default": ""
+    },
+    {
+      "key": "notePasswords",
+      "name": "Per-note passwords (JSON)",
+      "description": "Optional overrides using published note URLs: {\"/private-note/\":\"different passphrase\"}. These notes are locked automatically. Keep the garden source repository private.",
+      "type": "text",
+      "default": "{}"
+    },
+    {
+      "key": "excludeLockedFromSearch",
+      "name": "Exclude locked notes from search",
+      "type": "boolean",
+      "default": true
+    },
+    {
+      "key": "excludeLockedFromFeed",
+      "name": "Exclude locked notes from RSS",
+      "type": "boolean",
+      "default": true
+    }
   ]
 }

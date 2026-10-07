@@ -3,6 +3,9 @@
   function boot() {
     var configElement = document.getElementById("dg-note-lock-config");
     if (!configElement) return;
+    var initialContent = document.querySelector("main.content, .content");
+    if (initialContent && initialContent.dgNoteLockInitialized) return;
+    if (initialContent) initialContent.dgNoteLockInitialized = true;
     var payload;
     try { payload = JSON.parse(configElement.textContent); } catch (_) { payload = {}; }
     var allowNavigation = payload.showFileBrowser === true;
@@ -62,6 +65,12 @@
     var submit = dialog.querySelector(".dg-note-lock-submit");
     var status = dialog.querySelector('[role="status"]');
     var reveal = dialog.querySelector(".dg-note-lock-reveal");
+    if (payload.configurationError) {
+      input.disabled = true;
+      submit.disabled = true;
+      status.textContent = "The garden owner needs to correct this note's lock settings.";
+      return;
+    }
     input.focus();
     reveal.addEventListener("click", function () {
       var visible = input.type === "password";

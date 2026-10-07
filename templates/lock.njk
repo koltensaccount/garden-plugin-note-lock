@@ -1,4 +1,4 @@
-{% set lockConfig = page.url | gpNoteLock(noteProps.lock) %}
+{% set lockConfig = page.url | gpNoteLock(noteProps.lock or lock) %}
 {% if lockConfig %}
 <script type="application/json" id="dg-note-lock-config">{{ lockConfig | safe }}</script>
 <script>document.documentElement.classList.add("dg-note-locked");</script>
