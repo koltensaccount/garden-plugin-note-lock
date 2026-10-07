@@ -50,7 +50,7 @@ function createResolver(settings) {
     if (!cache.has(key)) cache.set(key, (() => {
       const salt = crypto.randomBytes(16);
       const verifier = crypto.pbkdf2Sync(password, salt, ITERATIONS, 32, "sha256");
-      return safeJson({ version: 1, salt: salt.toString("base64"), verifier: verifier.toString("base64"), iterations: ITERATIONS });
+      return safeJson({ version: 1, salt: salt.toString("base64"), verifier: verifier.toString("base64"), iterations: ITERATIONS, showFileBrowser: settings.showFileBrowser === true });
     })());
     return cache.get(key);
   };

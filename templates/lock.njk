@@ -2,8 +2,21 @@
 {% if lockConfig %}
 <script type="application/json" id="dg-note-lock-config">{{ lockConfig | safe }}</script>
 <script>document.documentElement.classList.add("dg-note-locked");</script>
+{% if pluginSettings.showFileBrowser %}
+<script>document.documentElement.classList.add("dg-note-lock-navigation");</script>
+{% endif %}
 <style>
 html.dg-note-locked body > :not(.dg-note-lock),
 html.dg-note-locked body > :not(.dg-note-lock) * { visibility: hidden !important; }
+html.dg-note-locked.dg-note-lock-navigation body:not(.dg-rp-left-closed) .filetree-wrapper,
+html.dg-note-locked.dg-note-lock-navigation body:not(.dg-rp-left-closed) .filetree-wrapper *,
+html.dg-note-locked.dg-note-lock-navigation body .navbar,
+html.dg-note-locked.dg-note-lock-navigation body .navbar *,
+html.dg-note-locked.dg-note-lock-navigation body .fullpage-overlay,
+html.dg-note-locked.dg-note-lock-navigation body .dg-rp-restore-left,
+html.dg-note-locked.dg-note-lock-navigation body .dg-rp-restore-left *,
+html.dg-note-locked.dg-note-lock-navigation body .dg-rp-left-splitter { visibility: visible !important; }
+html.dg-note-locked.dg-note-lock-navigation body :is(.filetree-wrapper, .navbar) :is(.search-button, .page-panel-toggle, .dg-print-button),
+html.dg-note-locked.dg-note-lock-navigation body :is(.filetree-wrapper, .navbar) :is(.search-button, .page-panel-toggle, .dg-print-button) * { visibility: hidden !important; pointer-events: none !important; }
 </style>
 {% endif %}

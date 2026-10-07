@@ -41,6 +41,16 @@ test("invalid settings and missing passwords fail visibly", () => {
   assert.throws(() => createResolver({ notePasswords: '{"https://example.com/":"example"}' })("/note/", false), /published paths/);
 });
 
+test("file-browser access is opt-in and is carried in the page configuration", () => {
+  for (const allowed of [false, true]) {
+    const resolve = createResolver({ defaultPassword: "navigation test only", notePasswords: "{}", showFileBrowser: allowed });
+    assert.equal(JSON.parse(resolve("/", true)).showFileBrowser, allowed);
+  }
+  const definition = require("../garden-plugin.json").settings.find(setting => setting.key === "showFileBrowser");
+  assert.equal(definition.type, "boolean");
+  assert.equal(definition.default, false);
+});
+
 test("hook registers a synchronous filter that emits the lock payload", () => {
   let filter;
   require("../index.js").setupEleventy({

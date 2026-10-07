@@ -1,5 +1,15 @@
 html.dg-note-locked body > :not(.dg-note-lock),
 html.dg-note-locked body > :not(.dg-note-lock) * { visibility: hidden !important; }
+html.dg-note-locked.dg-note-lock-navigation body:not(.dg-rp-left-closed) .filetree-wrapper,
+html.dg-note-locked.dg-note-lock-navigation body:not(.dg-rp-left-closed) .filetree-wrapper *,
+html.dg-note-locked.dg-note-lock-navigation body .navbar,
+html.dg-note-locked.dg-note-lock-navigation body .navbar *,
+html.dg-note-locked.dg-note-lock-navigation body .fullpage-overlay,
+html.dg-note-locked.dg-note-lock-navigation body .dg-rp-restore-left,
+html.dg-note-locked.dg-note-lock-navigation body .dg-rp-restore-left *,
+html.dg-note-locked.dg-note-lock-navigation body .dg-rp-left-splitter { visibility: visible !important; }
+html.dg-note-locked.dg-note-lock-navigation body :is(.filetree-wrapper, .navbar) :is(.search-button, .page-panel-toggle, .dg-print-button),
+html.dg-note-locked.dg-note-lock-navigation body :is(.filetree-wrapper, .navbar) :is(.search-button, .page-panel-toggle, .dg-print-button) * { visibility: hidden !important; pointer-events: none !important; }
 .dg-note-lock {
   position: fixed;
   inset: 0;
@@ -15,7 +25,15 @@ html.dg-note-locked body > :not(.dg-note-lock) * { visibility: hidden !important
   color: var(--text-normal, #111);
   overflow: auto;
 }
-.dg-note-lock[open] { display: flex; align-items: center; justify-content: center; }
+.dg-note-lock[open] { display: flex; align-items: safe center; justify-content: center; }
+html.dg-note-lock-navigation .dg-note-lock {
+  left: var(--dg-note-lock-left-edge, 0px);
+  top: var(--dg-note-lock-top-edge, 0px);
+  width: calc(100% - var(--dg-note-lock-left-edge, 0px));
+  height: calc(100dvh - var(--dg-note-lock-top-edge, 0px));
+  z-index: 9;
+}
+html.dg-note-locked.dg-note-lock-navigation body .fullpage-overlay { z-index: 10; }
 .dg-note-lock-form { width: min(360px, 100%); }
 .dg-note-lock-symbol { color: var(--text-muted); margin-bottom: 20px; }
 .dg-note-lock-symbol .lucide { width: 28px; height: 28px; }

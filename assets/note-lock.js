@@ -3,7 +3,11 @@
   function boot() {
     var configElement = document.getElementById("dg-note-lock-config");
     if (!configElement) return;
+    var payload;
+    try { payload = JSON.parse(configElement.textContent); } catch (_) { payload = {}; }
+    var allowNavigation = payload.showFileBrowser === true;
     document.documentElement.classList.add("dg-note-locked");
+    document.documentElement.classList.toggle("dg-note-lock-navigation", allowNavigation);
     var content = document.querySelector("main.content, .content");
     if (content) content.inert = true;
     var dialog = document.createElement("dialog");
@@ -19,7 +23,40 @@
       '<p id="dg-note-lock-status" role="status" aria-live="polite"></p><a class="dg-note-lock-home" href="/">Back to garden</a></form>';
     document.body.appendChild(dialog);
     dialog.addEventListener("cancel", function (event) { event.preventDefault(); });
-    dialog.showModal();
+    dialog.setAttribute("aria-modal", String(!allowNavigation));
+    if (allowNavigation) dialog.show();
+    else dialog.showModal();
+    var navigationObserver;
+    var resizeQueued = false;
+    function updateNavigationLayout() {
+      resizeQueued = false;
+      if (!dialog.isConnected) return;
+      var left = 0;
+      var top = 0;
+      var tree = document.querySelector(".filetree-wrapper");
+      var treeBox = tree && tree.getBoundingClientRect();
+      // Mobile drawers keep their native overlay behavior rather than squeezing the form.
+      if (window.innerWidth >= 1000 && treeBox && treeBox.width > 0 && getComputedStyle(tree).visibility !== "hidden") left = treeBox.right;
+      document.querySelectorAll(".navbar").forEach(function (nav) {
+        var rect = nav.getBoundingClientRect();
+        if (rect.width > 0 && rect.height > 0 && getComputedStyle(nav).visibility !== "hidden") top = Math.max(top, rect.bottom);
+      });
+      document.documentElement.style.setProperty("--dg-note-lock-left-edge", Math.max(0, Math.min(left, window.innerWidth - 100)) + "px");
+      document.documentElement.style.setProperty("--dg-note-lock-top-edge", Math.max(0, Math.min(top, window.innerHeight - 100)) + "px");
+    }
+    function scheduleNavigationLayout() {
+      if (resizeQueued) return;
+      resizeQueued = true;
+      window.requestAnimationFrame(updateNavigationLayout);
+    }
+    if (allowNavigation) {
+      updateNavigationLayout();
+      window.addEventListener("resize", scheduleNavigationLayout, { passive: true });
+      if (window.ResizeObserver) {
+        navigationObserver = new ResizeObserver(scheduleNavigationLayout);
+        document.querySelectorAll(".filetree-wrapper, .navbar").forEach(function (nav) { navigationObserver.observe(nav); });
+      }
+    }
     if (window.lucide) window.lucide.createIcons();
     var input = dialog.querySelector("input");
     var submit = dialog.querySelector(".dg-note-lock-submit");
@@ -73,6 +110,11 @@
         }
         input.value = "";
         document.documentElement.classList.remove("dg-note-locked");
+        document.documentElement.classList.remove("dg-note-lock-navigation");
+        if (navigationObserver) navigationObserver.disconnect();
+        window.removeEventListener("resize", scheduleNavigationLayout);
+        document.documentElement.style.removeProperty("--dg-note-lock-left-edge");
+        document.documentElement.style.removeProperty("--dg-note-lock-top-edge");
         if (content) content.inert = false;
         document.removeEventListener("keydown", preventPrint, true);
         dialog.close();

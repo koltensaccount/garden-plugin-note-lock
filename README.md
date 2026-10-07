@@ -38,6 +38,18 @@ Save settings and publish/redeploy the garden. Reopening a page requires its
 password again; entered passwords are not stored in browser storage. Disabling
 or uninstalling this plugin removes the lock on the next deployment.
 
+**Show file browser while locked** is off by default. Enable it to keep the
+garden's existing file/tag browser and mobile navigation available alongside
+the lock. Useful when the locked note is the homepage. The note and right TOC
+remain hidden. File-browser resizing, collapse/reopen and theme switching keep
+working. Search, TOC and print buttons are hidden while locked and return after
+unlocking. This honors Digital Garden's existing file-browser setting and does
+not create a second browser or modify core files or other plugins.
+
+Off keeps the full-page screen with navigation hidden. This does not prevent
+direct visits to other URLs; mark other notes as locked too if you want the
+same casual-privacy screen on them.
+
 ## Limitations
 
 Passwords are stored as plaintext in the garden plugin configuration in your
