@@ -40,6 +40,8 @@ Keep the garden source private: configured passwords are stored there. The clien
 
 ## Compatibility and Accessibility
 
+Locked notes show a generic notice instead of Digital Garden hover previews. Public previews and normal click-to-open/password entry still work. This also blocks the core preview cache and heading-fragment links. Update the plugin, rebuild the entire site, and reload already-open pages; old tabs may retain old preview content. Third-party preview implementations and direct HTML/attachment access are not secure access boundaries.
+
 Works alone and with the other reading plugins. Shared footer controls use the neutral `dg-nav-tools` convention, with a floating fallback when navigation is absent. Each plugin ships the helper it needs; none imports another plugin. Current Digital Garden uses full-document navigation. Initialization is idempotent. Native controls, accessible labels, focus outlines and appropriate ARIA states are retained. Print styles remain separate from screen preferences. Browser storage failures fall back safely.
 
 ## Development

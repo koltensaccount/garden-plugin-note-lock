@@ -108,7 +108,7 @@ test("hook registers a synchronous filter that emits the lock payload", () => {
   let filter;
   require("../index.js").setupEleventy({
     on() {},
-    addFilter(name, callback) { assert.equal(name, "gpNoteLock"); filter = callback; }
+    addFilter(name, callback) { if (name === "gpNoteLock") filter = callback; }
   }, { settings: { defaultPassword: "", notePasswords: '{"/":"integration example"}' } });
   const value = filter("/", undefined);
   assert.equal(typeof value, "string");

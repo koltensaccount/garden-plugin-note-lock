@@ -96,6 +96,7 @@ module.exports = {
       protectedPaths.clear();
       for (const key of overrides.keys()) protectedPaths.add(key);
     });
+    eleventyConfig.addFilter("gpNoteLockPreviewPaths", () => safeJson(Array.from(protectedPaths)));
     // The garden's slot renderer uses synchronous Nunjucks for-loops.
     eleventyConfig.addFilter("gpNoteLock", function (path, locked) {
       const props = this && this.ctx && this.ctx["dg-note-properties"];

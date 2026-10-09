@@ -1,18 +1,20 @@
 {
   "id": "note-lock",
   "name": "Note Lock (Casual Privacy)",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "A client-side password screen for casual privacy with optional navigation and search/feed filtering; not encryption or secure access control.",
   "author": "Kolten Bendickson",
   "hooks": "index.js",
   "slots": {
-    "common.head": "templates/lock.njk"
+    "common.head": "templates/lock.njk",
+    "common.footer": "templates/preview.njk"
   },
   "styles": [
     "styles/note-lock.css"
   ],
   "scripts": [
-    "assets/note-lock.js"
+    "assets/note-lock.js",
+    "assets/preview-guard.js"
   ],
   "settings": [
     {

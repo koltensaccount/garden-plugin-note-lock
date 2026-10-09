@@ -1,5 +1,9 @@
 # Validation
 
+## Version 1.1.2 Preview Fix
+
+The native link-preview iframe copies the locked note's `.content.innerHTML` without its head-time lock CSS. Note Lock now emits protected paths (no passwords) on all pages and intercepts core hover events before its listener or cache runs. A browser regression using an unchanged copy of upstream `dg-link-preview/templates/linkPreview.njk` checks checkbox locks, URL overrides, backlink hover, nested link text, heading fragments, cached private previews, public previews and direct password unlock. All 13 tests passed; the focused preview test was also rerun after the patch-version bump. This fixes normal core hover behavior, not direct HTML retrieval or third-party preview engines.
+
 Version 1.1.1 validated on 2026-10-07, Node 22.23.3 and Google Chrome 154 (Playwright).
 
 ## Standalone
