@@ -6,6 +6,17 @@ const path = require("node:path");
 const { createResolver } = require("../index.js");
 const { filterDiscovery } = require("../index.js");
 
+test('remembered verifier survives rebuilds and changes only for the affected note/password', () => {
+  const settings = {defaultPassword:'shared fixture', notePasswords:'{"/specific/":"specific fixture"}'};
+  const first = createResolver(settings), rebuilt = createResolver(settings);
+  const shared = JSON.parse(first('/shared/',true));
+  assert.equal(JSON.parse(rebuilt('/shared/',true)).verifier,shared.verifier);
+  assert.notEqual(JSON.parse(first('/another/',true)).salt,shared.salt);
+  const changed = createResolver({...settings,defaultPassword:'new shared fixture'});
+  assert.notEqual(JSON.parse(changed('/shared/',true)).verifier,shared.verifier);
+  assert.equal(JSON.parse(changed('/specific/',false)).verifier,JSON.parse(first('/specific/',false)).verifier);
+});
+
 test('search and Atom exclude protected paths and retain unrelated entries; both options can be disabled', () => {
   const protectedPaths = new Set(['/locked-demonstration']);
   const search = JSON.stringify([{url:'/public/'},{url:'/locked-demonstration/',content:'private fixture'}]);

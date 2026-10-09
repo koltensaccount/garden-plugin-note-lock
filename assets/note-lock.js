@@ -95,6 +95,36 @@
     }
     document.addEventListener("keydown", preventPrint, true);
     var busy = false;
+    var storageKey = "dgNoteLock.unlock:" + location.pathname;
+    var marker = JSON.stringify([payload.version, payload.iterations, payload.salt, payload.verifier]);
+    function unlock() {
+        input.value = "";
+        document.documentElement.classList.add("dg-note-unlocked");
+        document.documentElement.classList.remove("dg-note-locked", "dg-note-lock-navigation");
+        if (navigationObserver) navigationObserver.disconnect();
+        window.removeEventListener("resize", scheduleNavigationLayout);
+        document.documentElement.style.removeProperty("--dg-note-lock-left-edge");
+        document.documentElement.style.removeProperty("--dg-note-lock-top-edge");
+        if (content) content.inert = false;
+        document.removeEventListener("keydown", preventPrint, true);
+        dialog.close();
+        dialog.remove();
+        if (content) {
+          var originalTabIndex = content.getAttribute("tabindex");
+          content.setAttribute("tabindex", "-1");
+          content.focus();
+          if (originalTabIndex === null) content.removeAttribute("tabindex");
+          else content.setAttribute("tabindex", originalTabIndex);
+        }
+        document.dispatchEvent(new CustomEvent("dg:note-unlocked"));
+    }
+    try {
+      if (payload.version === 1 && payload.iterations === 600000 && bytes(payload.salt).length === 16 && bytes(payload.verifier).length === 32 && localStorage.getItem(storageKey) === marker) {
+        unlock();
+        return;
+      }
+      localStorage.removeItem(storageKey);
+    } catch (_) {}
     dialog.querySelector("form").addEventListener("submit", async function (event) {
       event.preventDefault();
       if (busy) return;
@@ -119,26 +149,8 @@
           input.select();
           return;
         }
-        input.value = "";
-        document.documentElement.classList.add("dg-note-unlocked");
-        document.documentElement.classList.remove("dg-note-locked");
-        document.documentElement.classList.remove("dg-note-lock-navigation");
-        if (navigationObserver) navigationObserver.disconnect();
-        window.removeEventListener("resize", scheduleNavigationLayout);
-        document.documentElement.style.removeProperty("--dg-note-lock-left-edge");
-        document.documentElement.style.removeProperty("--dg-note-lock-top-edge");
-        if (content) content.inert = false;
-        document.removeEventListener("keydown", preventPrint, true);
-        dialog.close();
-        dialog.remove();
-        if (content) {
-          var originalTabIndex = content.getAttribute("tabindex");
-          content.setAttribute("tabindex", "-1");
-          content.focus();
-          if (originalTabIndex === null) content.removeAttribute("tabindex");
-          else content.setAttribute("tabindex", originalTabIndex);
-        }
-        document.dispatchEvent(new CustomEvent("dg:note-unlocked"));
+        try { localStorage.setItem(storageKey, marker); } catch (_) {}
+        unlock();
       } catch (error) {
         status.textContent = error.message === "crypto-unavailable" ? "Password entry requires HTTPS and a modern browser." : "This lock could not be checked. Reload the page or contact the garden owner.";
       } finally {

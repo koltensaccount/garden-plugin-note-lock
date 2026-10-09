@@ -1,5 +1,9 @@
 # Validation
 
+## Version 1.2.0 Remembered Unlocks
+
+On 2026-10-09, `npm run check` and `npm test` passed: 14 tests, none skipped, using Node 22.23.3 and installed Chrome. Focused browser and configuration tests cover remembered unlock after reload/rebuild, separate note passwords, rejection of wrong passwords, changed-password invalidation, unaffected other-note unlocks and stable note-specific PBKDF2 verifiers. Existing delayed-load/TOC hiding, typing, navigation, preview blocking and discovery filtering checks remain included. No broad cross-plugin matrix was rerun for this change. Browser storage is a convenience, not an access-control boundary.
+
 ## Version 1.1.2 Preview Fix
 
 The native link-preview iframe copies the locked note's `.content.innerHTML` without its head-time lock CSS. Note Lock now emits protected paths (no passwords) on all pages and intercepts core hover events before its listener or cache runs. A browser regression using an unchanged copy of upstream `dg-link-preview/templates/linkPreview.njk` checks checkbox locks, URL overrides, backlink hover, nested link text, heading fragments, cached private previews, public previews and direct password unlock. All 13 tests passed; the focused preview test was also rerun after the patch-version bump. This fixes normal core hover behavior, not direct HTML retrieval or third-party preview engines.

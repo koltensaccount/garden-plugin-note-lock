@@ -66,7 +66,8 @@ function createResolver(settings) {
       throw new Error("Note Lock: a note has lock: true but no password is configured in the plugin settings.");
     }
     if (!cache.has(key)) cache.set(key, (() => {
-      const salt = crypto.randomBytes(16);
+      // Public, note-specific salt keeps the verifier stable across unchanged builds.
+      const salt = crypto.createHash("sha256").update("dg-note-lock:remember:v1:" + key).digest().subarray(0, 16);
       const verifier = crypto.pbkdf2Sync(password, salt, ITERATIONS, 32, "sha256");
       return safeJson({ version: 1, salt: salt.toString("base64"), verifier: verifier.toString("base64"), iterations: ITERATIONS, showFileBrowser: settings.showFileBrowser === true });
     })());

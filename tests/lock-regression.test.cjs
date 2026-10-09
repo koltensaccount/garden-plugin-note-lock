@@ -11,7 +11,7 @@ const chrome = process.env.CHROME_PATH || ['/usr/bin/google-chrome', '/usr/bin/c
 test('real head template: typing, navigation, malformed settings, delayed assets and repeated reloads', {timeout:60000}, async () => {
   assert(chrome, 'Set CHROME_PATH');
   function head(url) {
-    const settings = { defaultPassword: url.searchParams.has('missing') ? '' : 'fixture passphrase', notePasswords: url.searchParams.has('bad') ? '{bad json' : '{}', showFileBrowser: url.searchParams.has('navigation') };
+    const settings = { defaultPassword: url.searchParams.has('missing') ? '' : url.searchParams.has('changed') ? 'changed passphrase' : 'fixture passphrase', notePasswords: url.searchParams.has('bad') ? '{bad json' : '{"/other/":"other passphrase"}', showFileBrowser: url.searchParams.has('navigation') };
     const env = new nunjucks.Environment(new nunjucks.FileSystemLoader(path.join(root, 'templates')), {autoescape:true});
     require('../index.js').setupEleventy({on(){},addFilter(name, callback){env.addFilter(name,callback);}}, {settings});
     return env.render('lock.njk', {page:{url:url.pathname}, 'dg-note-properties':{lock:url.pathname === '/locked/'}, pluginSettings:settings});
@@ -59,6 +59,7 @@ test('real head template: typing, navigation, malformed settings, delayed assets
         assert.equal(await page.locator('#dg-note-lock-password').inputValue(),'typed normally');
       }
       for (const width of [1600,390]) {
+        await page.evaluate(() => localStorage.clear());
         await page.setViewportSize({width,height:844});
         await page.goto(`http://127.0.0.1:${server.address().port}/locked/?${navigation?'navigation':''}`);
         const input = page.locator('#dg-note-lock-password');
@@ -73,13 +74,37 @@ test('real head template: typing, navigation, malformed settings, delayed assets
         assert.equal(await page.locator('main.content').isVisible(),true);
         assert.equal(await page.locator('.toc-container a').isVisible(),true);
         assert.equal(await page.locator('main.content').evaluate(el=>el.inert),false);
+        await page.reload();
+        await page.waitForFunction(()=>document.documentElement.classList.contains('dg-note-unlocked'));
+        assert.equal(await page.locator('.dg-note-lock').count(),0,'Remembered unlock survives rebuild/reload');
       }
+      await page.evaluate(() => localStorage.clear());
     }
     await page.goto(`http://127.0.0.1:${server.address().port}/?bad`);
     assert.equal(await page.locator('.dg-note-lock').count(),0,'Bad JSON must not lock homepage');
     await page.goto(`http://127.0.0.1:${server.address().port}/locked/?bad`);
     await page.locator('#dg-note-lock-password').fill('fixture passphrase');
     await page.locator('.dg-note-lock-submit').click();
+    await page.waitForFunction(()=>document.documentElement.classList.contains('dg-note-unlocked'));
+    await page.goto(`http://127.0.0.1:${server.address().port}/other/`);
+    assert.equal(await page.locator('main.content').isVisible(),false,'Other note needs its own unlock');
+    await page.locator('#dg-note-lock-password').fill('fixture passphrase');
+    await page.locator('.dg-note-lock-submit').click();
+    await page.waitForFunction(()=>document.querySelector('#dg-note-lock-status').textContent.includes('did not match'));
+    await page.locator('#dg-note-lock-password').fill('other passphrase');
+    await page.locator('.dg-note-lock-submit').click();
+    await page.waitForFunction(()=>document.documentElement.classList.contains('dg-note-unlocked'));
+    await page.reload();
+    await page.waitForFunction(()=>document.documentElement.classList.contains('dg-note-unlocked'));
+    await page.goto(`http://127.0.0.1:${server.address().port}/locked/?changed`);
+    assert.equal(await page.locator('main.content').isVisible(),false,'Changed password invalidates saved unlock');
+    await page.locator('#dg-note-lock-password').fill('fixture passphrase');
+    await page.locator('.dg-note-lock-submit').click();
+    await page.waitForFunction(()=>document.querySelector('#dg-note-lock-status').textContent.includes('did not match'));
+    await page.locator('#dg-note-lock-password').fill('changed passphrase');
+    await page.locator('.dg-note-lock-submit').click();
+    await page.waitForFunction(()=>document.documentElement.classList.contains('dg-note-unlocked'));
+    await page.goto(`http://127.0.0.1:${server.address().port}/other/`);
     await page.waitForFunction(()=>document.documentElement.classList.contains('dg-note-unlocked'));
     await page.goto(`http://127.0.0.1:${server.address().port}/locked/?missing`);
     assert.equal(await page.locator('.dg-note-lock h1').textContent(),'Lock needs setup');

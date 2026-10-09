@@ -30,6 +30,8 @@ Keep the garden source private: configured passwords are stored there. The clien
 
 ## Settings
 
+Successful unlocks are remembered per published note in this browser using localStorage, without storing the typed password. Unchanged site rebuilds retain access; changing that note's effective password requires entering it again after the updated page is loaded. Notes with different passwords remain independent, and unlocking one shared-password note does not unlock all others. Clearing site storage, private browsing or blocked storage may require entering passwords again. Anyone using the same browser profile can read remembered notes, so avoid unlocking on shared/public devices. A note's public PBKDF2 salt is stable and note-specific to support this behavior. Saved markers are client-side convenience, not secure authentication; hover previews remain blocked even after unlocking.
+
 | Key | Setting | Default |
 | --- | --- | --- |
 | `showFileBrowser` | Show file browser while locked | false |
